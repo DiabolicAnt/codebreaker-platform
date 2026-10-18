@@ -10,4 +10,12 @@ htmlcov/
 !.env.example
 firebase-credentials.json
 service-account*.json
+*-firebase-adminsdk-*.json
+firebase-debug.log
+firestore-debug.log
 pyvenv.cfg
+data/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+.test-data/

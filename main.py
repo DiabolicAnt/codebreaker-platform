@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
-from routers import evaluator, flashcards
+from routers import auth, evaluator, flashcards
 
 
-app = FastAPI(title="Code-Breaker-API", version="0.2.0")
+app = FastAPI(title="Code-Breaker-API", version="0.4.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().cors_origins,
@@ -14,6 +14,7 @@ app.add_middleware(
 )
 app.include_router(evaluator.router, prefix="/evaluator")
 app.include_router(flashcards.router, prefix="/flashcards")
+app.include_router(auth.router, prefix="/auth")
 
 
 @app.get("/")

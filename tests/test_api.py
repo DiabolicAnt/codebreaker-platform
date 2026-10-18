@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest.mock import AsyncMock
 
 from fastapi.testclient import TestClient
@@ -6,16 +7,25 @@ from fastapi.testclient import TestClient
 from config import Settings
 from main import app
 from services.llm_judge import CoherenceJudge, CoherenceResult, get_judge
+from services.auth import AuthenticatedUser, get_current_user
+from services.evaluations import EvaluationsService, get_evaluations_service
+from services.evaluation_repository import SQLiteEvaluationRepository
+from tests.helpers import TemporaryTestDirectory
 
 
 class ApiTests(unittest.TestCase):
     def setUp(self):
+        self.temp = TemporaryTestDirectory()
+        self.sessions = EvaluationsService(SQLiteEvaluationRepository(Path(self.temp.name) / "sessions.sqlite3"))
+        app.dependency_overrides[get_evaluations_service] = lambda: self.sessions
+        app.dependency_overrides[get_current_user] = lambda: AuthenticatedUser(uid="caleb")
         app.dependency_overrides[get_judge] = lambda: CoherenceJudge(Settings())
         self.client = TestClient(app)
 
     def tearDown(self):
         self.client.close()
         app.dependency_overrides.clear()
+        self.temp.cleanup()
 
     def test_app_starts_and_openapi_is_available(self):
         self.assertEqual(self.client.get("/").json()["status"], "ok")
